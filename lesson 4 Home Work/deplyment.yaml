@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-cm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx-cm
+  template:
+    metadata:
+      labels:
+        app: nginx-cm
+    spec:
+      containers:
+        - name: nginx
+          image: nginx
+          ports:
+            - containerPort: 80
+
+          # 1️⃣ Load environment variables from ConfigMap
+          envFrom:
+            - configMapRef:
+                name: nginx-config
+
+          # 2️⃣ Mount nginx.conf from ConfigMap
+          volumeMounts:
+            - name: config-volume
+              mountPath: /etc/nginx/nginx.conf
+              subPath: nginx.conf  # Important to mount single file correctly
+
+      volumes:
+        - name: config-volume
+          configMap:
+            name: nginx-config
